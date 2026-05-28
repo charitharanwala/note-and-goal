@@ -1,0 +1,36 @@
+{
+  "name": "todo-goals-app",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "description": "A To Do List and Goals desktop/PWA app",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "electron": "31.7.7",
+    "electron-builder": "25.1.8",
+    "wrangler": "4.95.0"
+  },
+  "build": {
+    "appId": "com.todo.goals.app",
+    "productName": "To Do List and Goals",
+    "win": {
+      "icon": "icon.ico",
+      "target": [
+        "portable"
+      ]
+    },
+    "files": [
+      "main.js",
+      "github-todo-goals.html",
+      "todo-goals.webmanifest",
+      "todo-goals-sw.js",
+      "todo-goals-icon.svg",
+      "icon.png",
+      "icon.ico"
+    ]
+  }
+}
