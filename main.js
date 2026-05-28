@@ -16,7 +16,7 @@ function createWindow() {
     }
   });
 
-  win.loadFile('github-todo-goals.html');
+  win.loadFile('index.html');
 }
 
 app.whenReady().then(createWindow);

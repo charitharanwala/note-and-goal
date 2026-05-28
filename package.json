@@ -25,6 +25,7 @@
     },
     "files": [
       "main.js",
+      "index.html",
       "github-todo-goals.html",
       "todo-goals.webmanifest",
       "todo-goals-sw.js",
