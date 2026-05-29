@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#171b24">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tasks & Goals">
+<link rel="manifest" href="./todo-goals.webmanifest">
+<link rel="icon" href="./icon.png">
+<link rel="apple-touch-icon" href="./icon.png">
+<title>To Do List and Goals</title>
+<style>
+  *{box-sizing:border-box}
+  :root{
+    --bg:#0b0d12;
+    --bg2:#11151d;
+    --panel:#171b24;
+    --panel2:#202632;
+    --panel3:#262d3a;
+    --border:#333d4e;
+    --text:#f6f1e6;
+    --muted:#aeb6c4;
+    --dim:#707b8e;
+    --accent:#f2c84b;
+    --accent2:#d8a832;
+    --green:#5bd596;
+    --red:#ff6577;
+    --blue:#72b6ff;
+  }
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at top left, rgba(114,182,255,.14), transparent 28%),
+      linear-gradient(140deg,var(--bg),var(--bg2));
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .app{
+    width:min(980px,100%);
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:24px;
+    box-shadow:0 28px 90px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04);
+    overflow:hidden;
+  }
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:26px 28px;
+    border-bottom:1px solid var(--border);
+    background:rgba(255,255,255,.02);
+  }
+  h1{
+    margin:0;
+    font-size:30px;
+    font-weight:700;
+    letter-spacing:.01em;
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:6px;
+  }
+  .tabs{
+    display:flex;
+    gap:8px;
+  }
+  .header-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .tab{
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:var(--muted);
+    padding:10px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:700;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .tab.active{
+    color:#111;
+    border-color:var(--accent);
+    background:var(--accent);
+  }
+  main{padding:28px}
+  .page{display:none}
+  .page.active{display:block}
+  .toolbar{
+    display:grid;
+    grid-template-columns:1fr 150px auto auto;
+    gap:10px;
+    margin-bottom:20px;
+    background:rgba(255,255,255,.025);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:12px;
+  }
+  input{
+    width:100%;
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:var(--text);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:15px;
+    outline:none;
+    transition:border-color .18s, background .18s, box-shadow .18s;
+  }
+  input::placeholder{color:var(--dim)}
+  input:focus{
+    border-color:var(--blue);
+    background:#242b38;
+    box-shadow:0 0 0 3px rgba(114,182,255,.12);
+  }
+  button{
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:var(--text);
+    border-radius:12px;
+    padding:11px 14px;
+    cursor:pointer;
+    font-weight:700;
+    transition:border-color .18s, transform .18s, background .18s, color .18s;
+  }
+  button:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .add{
+    border-color:rgba(91,213,150,.55);
+    color:#08120d;
+    background:var(--green);
+  }
+  .add:hover{
+    border-color:var(--green);
+    background:#73e3aa;
+  }
+  .reset{
+    border-color:rgba(255,101,119,.65);
+    color:var(--red);
+  }
+  .reset:hover{
+    background:rgba(255,101,119,.09);
+  }
+  .install{
+    border-color:rgba(242,200,75,.65);
+    color:#111;
+    background:var(--accent);
+    display:none;
+  }
+  .install.show{display:inline-flex}
+  .install:hover{
+    border-color:var(--accent);
+    background:#ffd86c;
+  }
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height:240px;
+  }
+  .item{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:12px;
+    align-items:center;
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:14px;
+    box-shadow:0 12px 30px rgba(0,0,0,.16);
+  }
+  .item:hover{
+    border-color:#455266;
+    background:var(--panel3);
+  }
+  .item.done .text{
+    color:var(--dim);
+    text-decoration:line-through;
+  }
+  .check{
+    width:20px;
+    height:20px;
+    accent-color:var(--green);
+    cursor:pointer;
+  }
+  .body{
+    min-width:0;
+  }
+  .text{
+    min-width:0;
+    word-break:break-word;
+    line-height:1.35;
+    font-size:16px;
+  }
+  .meta{
+    color:#111;
+    background:var(--accent);
+    display:inline-block;
+    border-radius:999px;
+    padding:4px 9px;
+    font-size:12px;
+    font-weight:700;
+    margin-top:8px;
+  }
+  .delete{
+    color:var(--red);
+    min-width:42px;
+    background:transparent;
+  }
+  .delete:hover{
+    border-color:var(--red);
+    background:rgba(255,101,119,.08);
+  }
+  .empty{
+    color:var(--dim);
+    text-align:center;
+    padding:56px 12px;
+    border:1px dashed var(--border);
+    border-radius:16px;
+    background:rgba(255,255,255,.015);
+  }
+  .stats{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:16px;
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    display:inline-flex;
+    padding:8px 12px;
+  }
+  @media(max-width:680px){
+    body{padding:12px}
+    header{align-items:flex-start;flex-direction:column}
+    .header-actions{width:100%;justify-content:stretch}
+    .tabs{width:100%}
+    .tab{flex:1}
+    .install.show{width:100%;justify-content:center}
+    main{padding:16px}
+    .toolbar{grid-template-columns:1fr}
+    h1{font-size:24px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>To Do List and Goals</h1>
+      <div class="subtitle">Plan the next task, then keep your bigger goals in sight.</div>
+    </div>
+    <div class="header-actions">
+      <div class="tabs">
+        <button class="tab active" data-page="todos">To Do</button>
+        <button class="tab" data-page="goals">Goals</button>
+      </div>
+      <button class="install" id="installApp" type="button">Install App</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page active" id="todos">
+      <form class="toolbar" data-list="todos">
+        <input id="todoInput" maxlength="160" placeholder="Add a to do item">
+        <input id="todoTime" type="time" aria-label="To do time">
+        <button class="add" type="button" data-add="todos">Add</button>
+        <button class="reset" type="button" data-reset="todos">Reset</button>
+      </form>
+      <div class="list" id="todoList"></div>
+      <div class="stats" id="todoStats"></div>
+    </section>
+
+    <section class="page" id="goals">
+      <form class="toolbar" data-list="goals">
+        <input id="goalInput" maxlength="160" placeholder="Add a goal">
+        <input id="goalDate" type="date" aria-label="Goal date">
+        <button class="add" type="button" data-add="goals">Add</button>
+        <button class="reset" type="button" data-reset="goals">Reset</button>
+      </form>
+      <div class="list" id="goalList"></div>
+      <div class="stats" id="goalStats"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+  const memoryStore = {};
+  const state = {
+    todos: load('todos'),
+    goals: load('goals')
+  };
+
+  function load(name){
+    try{
+      const stored = localStorage.getItem('github_' + name);
+      if(stored !== null) return JSON.parse(stored || '[]');
+    }catch(error){
+    }
+    return memoryStore[name] || [];
+  }
+
+  function save(name){
+    memoryStore[name] = state[name];
+    try{
+      localStorage.setItem('github_' + name, JSON.stringify(state[name]));
+    }catch(error){
+    }
+  }
+
+  function addItem(name, text, extra){
+    const clean = text.trim();
+    if(!clean) return;
+    state[name].push(Object.assign({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      text: clean,
+      done: false
+    }, extra || {}));
+    save(name);
+    render(name);
+  }
+
+  function toggleItem(name, id){
+    state[name] = state[name].map(item => item.id === id ? Object.assign({}, item, {done: !item.done}) : item);
+    save(name);
+    render(name);
+  }
+
+  function deleteItem(name, id){
+    state[name] = state[name].filter(item => item.id !== id);
+    save(name);
+    render(name);
+  }
+
+  function resetList(name){
+    if(!confirm('Reset all ' + (name === 'todos' ? 'to do items' : 'goals') + '?')) return;
+    state[name] = [];
+    save(name);
+    render(name);
+  }
+
+  function render(name){
+    const list = document.getElementById(name === 'todos' ? 'todoList' : 'goalList');
+    const stats = document.getElementById(name === 'todos' ? 'todoStats' : 'goalStats');
+    const items = state[name];
+    list.innerHTML = '';
+
+    if(items.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = name === 'todos' ? 'No to do items yet. Add one above.' : 'No goals yet. Add one above.';
+      list.appendChild(empty);
+    }else{
+      items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'item' + (item.done ? ' done' : '');
+
+        const check = document.createElement('input');
+        check.type = 'checkbox';
+        check.className = 'check';
+        check.checked = !!item.done;
+        check.addEventListener('change', () => toggleItem(name, item.id));
+
+        const body = document.createElement('div');
+        body.className = 'body';
+
+        const text = document.createElement('div');
+        text.className = 'text';
+        text.textContent = item.text || '';
+        body.appendChild(text);
+
+        if(name === 'todos' && item.time){
+          const meta = document.createElement('div');
+          meta.className = 'meta';
+          meta.textContent = 'Time: ' + item.time;
+          body.appendChild(meta);
+        }
+
+        if(name === 'goals' && item.date){
+          const meta = document.createElement('div');
+          meta.className = 'meta';
+          meta.textContent = 'Date: ' + formatDate(item.date);
+          body.appendChild(meta);
+        }
+
+        const del = document.createElement('button');
+        del.className = 'delete';
+        del.type = 'button';
+        del.textContent = 'Del';
+        del.addEventListener('click', () => deleteItem(name, item.id));
+
+        row.appendChild(check);
+        row.appendChild(body);
+        row.appendChild(del);
+        list.appendChild(row);
+      });
+    }
+
+    const complete = items.filter(item => item.done).length;
+    stats.textContent = complete + ' complete of ' + items.length + ' total';
+  }
+
+  function formatDate(value){
+    if(!value) return '';
+    const parts = value.split('-');
+    if(parts.length !== 3) return value;
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+
+  function addFromForm(name){
+    const textInput = document.getElementById(name === 'todos' ? 'todoInput' : 'goalInput');
+    const extraInput = document.getElementById(name === 'todos' ? 'todoTime' : 'goalDate');
+    const extra = name === 'todos' ? { time: extraInput.value } : { date: extraInput.value };
+    addItem(name, textInput.value, extra);
+    textInput.value = '';
+    extraInput.value = '';
+    textInput.focus();
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.page).classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('form[data-list]').forEach(form => {
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const name = form.dataset.list;
+      addFromForm(name);
+    });
+  });
+
+  document.querySelectorAll('[data-add]').forEach(button => {
+    button.addEventListener('click', () => {
+      addFromForm(button.dataset.add);
+    });
+  });
+
+  document.querySelectorAll('[data-reset]').forEach(button => {
+    button.addEventListener('click', () => resetList(button.dataset.reset));
+  });
+
+  let installPrompt = null;
+  const installButton = document.getElementById('installApp');
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    installPrompt = event;
+    if(installButton) installButton.classList.add('show');
+  });
+
+  if(installButton){
+    installButton.addEventListener('click', async () => {
+      if(!installPrompt) return;
+      installPrompt.prompt();
+      await installPrompt.userChoice;
+      installPrompt = null;
+      installButton.classList.remove('show');
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    installPrompt = null;
+    if(installButton) installButton.classList.remove('show');
+  });
+
+  if('serviceWorker' in navigator && location.protocol !== 'file:'){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./todo-goals-sw.js').catch(() => {});
+    });
+  }
+
+  render('todos');
+  render('goals');
+})();
+</script>
+</body>
+</html>
